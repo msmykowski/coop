@@ -9,10 +9,10 @@ import (
 type Connection = gorm.DB
 
 func Open() *Connection {
-  db, err := gorm.Open("postgres", "host=localhost port=5432 dbname=get_fit_dev sslmode=disable")
+  db, err := gorm.Open("postgres", "host=localhost port=5432 dbname=coop_dev sslmode=disable")
 
   if err != nil {
-    panic("Failed to connect database")
+    panic(err)
   }
 
   db.AutoMigrate(&models.JobDefinition{})

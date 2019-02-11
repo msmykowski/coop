@@ -13,6 +13,6 @@ func main() {
 
 	graphqlHandler := graphql.New(db)
 
-	http.Handle("/", graphqlHandler)
+	http.Handle("/api", graphqlHandler)
 	http.ListenAndServe(":8080", nil)
 }

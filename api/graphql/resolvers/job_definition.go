@@ -12,7 +12,7 @@ type JobDefinition struct {
 
 func (c *JobDefinition) Show(params graphql.ResolveParams) (interface{}, error) {
 	var jobDefinition models.JobDefinition
-	err := c.DB.Where("id = ?", params.Args["id"].(string)).First(&jobDefinition)
+	err := c.DB.Where("id = ?", params.Args["id"].(uint)).First(&jobDefinition)
 
 	if err.Error != nil {
 		return nil, err.Error

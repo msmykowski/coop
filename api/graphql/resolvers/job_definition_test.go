@@ -31,3 +31,33 @@ func TestJobDefinitionCreate(t *testing.T) {
     )
 	}
 }
+
+func TestJobDefinitionShow(t *testing.T) {
+	jd := resolvers.JobDefinition{DB: db.Open()}
+
+  expected := models.JobDefinition{Description: "description"}
+	jd.DB.Create(&expected)
+
+  m := map[string]interface{}{"id": expected.ID}
+	params := graphql.ResolveParams{Args: m}
+	actual, err := jd.Show(params)
+
+  if err != nil {
+    t.Error("Error:", err)
+  }
+
+  description := actual.(models.JobDefinition).Description
+
+  if expected.Description != description {
+		t.Error(
+      "JobDefinition Create:",
+      "expected:",
+      "description =",
+      description,
+      "|",
+      "received:",
+      "description =",
+      expected.Description,
+    )
+	}
+}

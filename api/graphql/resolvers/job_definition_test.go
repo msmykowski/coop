@@ -6,17 +6,21 @@ import (
 	"api/graphql/resolvers"
 	"github.com/graphql-go/graphql"
 	"testing"
+	"time"
 )
 
 func TestJobDefinitionCreate(t *testing.T) {
 	jd := resolvers.JobDefinition{DB: db.Open()}
-	m := map[string]interface{}{"description": "description", "executeAt": 12, "executeEvery": 1440}
+	m := map[string]interface{}{"description": "description", "executeAt": time.Now(), "executeEvery": 1440}
 
 	params := graphql.ResolveParams{Args: m}
 	jd.Create(params)
 
 	var jobDefinition models.JobDefinition
 	jd.DB.Last(&jobDefinition)
+
+	var jobExecution models.JobExecution
+	jd.DB.Last(&jobExecution)
 
 	if jobDefinition.Description != m["description"] {
 		t.Error(
@@ -31,19 +35,6 @@ func TestJobDefinitionCreate(t *testing.T) {
 		)
 	}
 
-	if jobDefinition.ExecuteAt != m["executeAt"] {
-		t.Error(
-			"JobDefinition Create:",
-			"expected:",
-			"executeAt =",
-			m["executeAt"],
-			"|",
-			"received:",
-			"executeAt =",
-			jobDefinition.ExecuteAt,
-		)
-	}
-
 	if jobDefinition.ExecuteEvery != m["executeEvery"] {
 		t.Error(
 			"JobDefinition Create:",
@@ -54,6 +45,32 @@ func TestJobDefinitionCreate(t *testing.T) {
 			"received:",
 			"executeEvery =",
 			jobDefinition.ExecuteEvery,
+		)
+	}
+
+	if jobExecution.ExecuteAt.UTC() != m["executeAt"].(time.Time).UTC() {
+		t.Error(
+			"JobDefinition Create:",
+			"expected:",
+			"executeAt =",
+			m["executeAt"].(time.Time).UTC(),
+			"|",
+			"received:",
+			"executeAt =",
+			jobExecution.ExecuteAt.UTC(),
+		)
+	}
+
+	if jobExecution.JobDefinitionID != jobDefinition.ID {
+		t.Error(
+			"JobDefinition Create:",
+			"expected:",
+			"JobDefinitionID =",
+			jobDefinition.ID,
+			"|",
+			"received:",
+			"executeAt =",
+			jobExecution.JobDefinitionID,
 		)
 	}
 }

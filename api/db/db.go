@@ -15,7 +15,7 @@ func Open() *Connection {
     panic(err)
   }
 
-  db.AutoMigrate(&models.JobDefinition{})
+  db.AutoMigrate(&models.JobDefinition{}, &models.JobExecution{})
 
   return db
 }

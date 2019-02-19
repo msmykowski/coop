@@ -4,6 +4,7 @@ import (
 	"api/db"
 	"api/db/models"
 	"github.com/graphql-go/graphql"
+	"time"
 )
 
 type JobDefinition struct {
@@ -13,11 +14,31 @@ type JobDefinition struct {
 func (c *JobDefinition) Create(params graphql.ResolveParams) (interface{}, error) {
 	var jobDefinition models.JobDefinition
 	jobDefinition.Description = params.Args["description"].(string)
-	jobDefinition.ExecuteAt = params.Args["executeAt"].(int)
 	jobDefinition.ExecuteEvery = params.Args["executeEvery"].(int)
 
-	if err := jobDefinition.Create(c.DB); err != nil {
-	    return nil, err
+	tx := c.DB.Begin()
+
+	if err := tx.Error; err != nil {
+		return nil, err
+	}
+
+	if err := tx.Create(&jobDefinition).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	var jobExecution models.JobExecution
+	jobExecution.ExecuteAt = params.Args["executeAt"].(time.Time).UTC()
+	jobExecution.JobDefinitionID = jobDefinition.ID
+
+	if err := tx.Create(&jobExecution).Error; err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	return jobDefinition, nil
